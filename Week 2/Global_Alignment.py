@@ -38,39 +38,6 @@ def lcsbacktrack(v,w,penalties):
 
     return backtrack , s[i][j]
 
-def iterativealignment(backtrack,v,w):
-    valin=""
-    walin=""
-    i=1
-    j=1
-    print(len(v)+1,len(w))
-    while i <= len(v) and j <=len(w):
-        print("starting",i,j)
-        if backtrack[i][j]=="↓":
-            valin+=v[i-1]
-            walin+="-"
-            i+=1
-            print("↓")
-            print(valin)
-            print(walin)
-        elif backtrack[i][j]=="→":
-            valin+="-"
-            walin+=w[j-1]
-            j+=1
-            print("→")
-            print(valin)
-            print(walin)
-        elif backtrack[i][j]=="↘":
-            valin+=v[i-1]
-            walin+=w[j-1]
-            if j != len(w):
-                j+=1
-            i+=1
-            print("↘")
-            print(valin)
-            print(walin)
-        
-    return
 
 def iteraticeoutputlcs(backtrack,v,w):
     i=len(v)
