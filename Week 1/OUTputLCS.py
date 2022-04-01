@@ -24,6 +24,8 @@ def lcsbacktrack(v,w):
                 backtrack[i].append(".")
                 backtrack[i][j]="↘"
     backtrack.pop(0)
+    print(backtrack)
+    print(s)
     for lst in backtrack :
         l=len(lst)
         i=0
