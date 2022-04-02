@@ -42,7 +42,6 @@ def lcsbacktrack(v,w,penalties):
 def iteraticeoutputlcs(backtrack,v,w):
     i=len(v)
     j=len(w)
-    print(i,"  ",j)
     valin=""
     walin=""
     while i >0  and j > 0 :
@@ -99,6 +98,8 @@ with open ("answear.txt","w") as d :
             anso+=ans[i][len(ans[i])-1-j]
         ansos.append(anso)
         d.write(ansos[i]+"\n")
+
+
 
 
 
