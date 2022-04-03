@@ -18,8 +18,7 @@ def localalignment(v,w,blos62):
     backtrack=[["."]]
     s.append([0])
     for i in range(len(v)):
-        val2=w[0]
-        s.append([score("-",val2,blos62)*(i+1)])
+        s.append([0])
         backtrack.append(["."])
     for i in range(len(w)):
         val2=v[0]
@@ -46,10 +45,9 @@ def localalignment(v,w,blos62):
                 backtrack[i][j]="↘"
     sink=0
     for i in range(len(s)): 
-        for j in range(len(s[i])):
-            if s[i][j] > sink:
-                sink=s[i][j]
-                ix=i
+        if s[i][len(w)] >= sink:
+            sink=s[i][j]
+            ix=i
     for a in s :
         print(a)
     for bac in backtrack :
@@ -75,7 +73,7 @@ def iterativelocalalignment(backtrack,v,w,isource,jsource,isink,jsink):
     walin=""
     i=isink
     j=jsink
-    while i >=isource  and j >jsource :
+    while i >isource  and j >jsource :
         if backtrack[i][j]=="↓":
             valin+=v[i-1]
             walin+="-"
@@ -136,7 +134,7 @@ backtrack=ans[0]
 scor=ans[1]
 isink=ans[2]
 jsink=len(backtrack[0])-1
-print("Score = ",scor)
+print(isink)
 
 
 ans=localsource(backtrack,isink)
@@ -148,6 +146,12 @@ print(ans)
 ans=iterativelocalalignment(backtrack,v,w,isource,jsource,isink,jsink)
 for a in ans:
     print(a)
+
+print("Score = ",scor)
+scor=0
+for i in range(len(ans[0])):
+    scor+=score(ans[0][i],ans[1][i],blos62)
+print("Score = ",scor)
 
 with open("answear.txt","w") as d :
     d.write(str(scor)+"\n")
