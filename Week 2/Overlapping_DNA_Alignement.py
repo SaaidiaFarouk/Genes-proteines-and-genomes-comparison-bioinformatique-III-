@@ -6,16 +6,18 @@ def bactrackpred(backtrack,i,j):
     return lst
 
 def overlapping_source(backtrack,i,j):
-    while j!=1 :
-        if backtrack[i][j]=="F":
-            j-=1
-        elif backtrack[i][j]=="↓":
+    while j!=1 or backtrack[i][j]=="↓":
+        if backtrack[i][j]=="↓":
             i-=1
         elif backtrack[i][j]=="→":
             j-=1
         elif backtrack[i][j]=="↘":
             i-=1
             j-=1
+        elif backtrack[i][j]==".":
+            i+=1
+            j+=1
+            break
     return i
 
 def Overlapping_DNA_Backtrack(v,w,penalties):
@@ -24,9 +26,9 @@ def Overlapping_DNA_Backtrack(v,w,penalties):
     s.append([0])
     for i in range(len(v)):
         s.append([0])
-        backtrack.append(["."])
+        backtrack.append([(".")])
     for j in range(len(w)):
-        s[0].append(0)
+        s[0].append(-(j+1)*penalties[2])
         backtrack[0].append(".")
     for i in range(1,len(v)+1):
         for j in range(1,len(w)+1):
@@ -36,12 +38,9 @@ def Overlapping_DNA_Backtrack(v,w,penalties):
             elif v[i-1] != w[j-1] :
                 match = -penalties[1]
             s[i].append(0)
-            s[i][j]=max(0,s[i-1][j]-penalties[2],s[i][j-1]-penalties[2],s[i-1][j-1]+match)
+            s[i][j]=max(s[i-1][j]-penalties[2],s[i][j-1]-penalties[2],s[i-1][j-1]+match)
             
-            if s[i][j] == 0 :
-                backtrack[i].append(".")
-                backtrack[i][j]="F"
-            elif s[i][j] == s[i-1][j]-penalties[2]:
+            if s[i][j] == s[i-1][j]-penalties[2]:
                 backtrack[i].append(".")
                 backtrack[i][j]="↓"
             elif s[i][j] == s[i][j-1]-penalties[2]:
@@ -57,10 +56,6 @@ def Overlapping_DNA_Backtrack(v,w,penalties):
             sink=s[len(v)][j]
             jx=j  
     
-    for b in s :
-        print(b)
-    for a in backtrack : 
-        print(a)
 
     return backtrack , s[len(v)][jx] ,jx   
     
@@ -73,7 +68,7 @@ def Overlapping_DNA_ALignement(v,w,penalties):
     vallin=""
     wallin=""
     isource=overlapping_source(backtrack,i,j)
-    while i >= isource  and j >= 1 :
+    while   j > 0 and i>=isource:
         if backtrack[i][j]=="↓":
             vallin+=v[i-1]
             wallin+="-"
@@ -99,22 +94,26 @@ def Overlapping_DNA_ALignement(v,w,penalties):
                         wallin += w[j-1] 
                         adv=(i,j)
                         i-=1
+                        j-=1
                     elif backtrack[adv[0]][adv[1]]=="→":
                         vallin += v[i-1]
                         wallin += w[j-1] 
                         adv=(i,j)
                         i-=1
+                        j-=1
                     elif backtrack[adv[0]][adv[1]]=="↘": 
                         if adv[0] != i and adv[1] == j :     
                             vallin += v[i-1]
                             wallin += "-"
                             adv=(i,j)
                             i-=1
+                            j-=1
                         elif adv[0] != i and adv[1] != j : 
                             vallin += v[i-1]
                             wallin += w[j-1] 
                             adv=(i,j)
                             i-=1
+                            j-=1
                 elif lst[1]=="." :
                     if backtrack[adv[0]][adv[1]]=="→":
                         vallin += v[i-1]
@@ -167,14 +166,7 @@ def Overlapping_DNA_ALignement(v,w,penalties):
                         wallin +="-"
                         i-=1
                         j-=1
-        elif backtrack[i][j]=="F":
-            vallin += v[i-1]
-            wallin += w[j-1] 
-            adv=(i,j)
-            i-=1
-            j-=1
-
-    
+        
     valinn=''
     walinn=''
     for i in range(len(vallin)):
@@ -199,4 +191,8 @@ with open ("dataset.txt","r") as f :
     w=data[2]
 
 
-Overlapping_DNA_ALignement(v,w,penalties)
+ans=Overlapping_DNA_ALignement(v,w,penalties)
+
+with open("answear.txt","w") as d :
+    for a in ans : 
+        d.write(a+"\n")
