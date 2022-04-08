@@ -96,27 +96,12 @@ def threelevelgraph(penalties,v,w):
                 middlebacktrack[i][j] = "U"
             
             
-    print("lower = ")
-    for a in lower : 
-        print(a)
-    print("middle = ")
-    for a in middle : 
-        print(a)
-    print("upper = ")
-    for a in upper : 
-        print(a)
+    for i in range(len(upper)):
+        print (upper[i],"   " ,middle[i],"    ",lower[i])
     
-    
-    print("lowerbacktrack = ")
-    for b in lowerbacktrack : 
-        print(b)
-    print("middlebacktrack = ")
-    for b in middlebacktrack :
-        print(b)
-
-    print("upperbacktrack = ")
-    for b in upperbacktrack : 
-        print(b)
+    print("       upper                    middle                    lower")
+    for i in range(len(upperbacktrack)):
+        print(upperbacktrack[i],"   ",middlebacktrack[i],"   ",lowerbacktrack[i])
 
     return upperbacktrack , lowerbacktrack , middlebacktrack, middle[i][j]
 
@@ -124,14 +109,16 @@ def backtrackingthreelevels(penalties,v,w):
     testv=''
     testw=''
     graphs=threelevelgraph(penalties,v,w)
+    upper=graphs[0]
+    lower=graphs[1]
     middle=graphs[2]
     i = len(v)
     j = len(w)
     vallin=""
     wallin=""
     graph = copy.deepcopy(middle)
-    while i != 0 or j !=0 : 
-        if graph[i][j] == "↘" or graph[i][j]=="M" :
+    while i != 0 or j !=0 :
+        if graph[i][j] == "↘":
             lst= bactrackpred(graph,i,j)
             if "." not in lst :
                 vallin += v[i-1]
@@ -215,17 +202,52 @@ def backtrackingthreelevels(penalties,v,w):
                         wallin +="-"
                         i-=1
                         j-=1
-        elif graph[i][j] == "→" or graph[i][j]=="U": 
-            vallin += "-"
-            wallin += w[j-1]
-            adv=(i,j)
-            j-=1
-        elif graph[i][j] == "↓" or graph[i][j]=="L":
+        elif graph[i][j] == "↓":
             vallin += v[i-1]
             wallin += "-"
-            adv=(i,j)
+            adv=(i,j) 
             i-=1
+        elif graph[i][j]=="→":
+            vallin += "-"
+            wallin += w[j-1]
+            adv=(i,j)    
+            j-=1     
+        elif graph[i][j]=="L" :
+            graph=copy.deepcopy(lower)
+            if graph[i][j] == "↓" or graph[i][j] =="M":
+                vallin += v[i-1]
+                wallin += "-"
+                adv=(i,j)
+                if graph[i][j] =="M":
+                    graph=copy.deepcopy(middle)
+                i-=1
+        elif graph[i][j]=="U" :
+            graph=copy.deepcopy(upper)
+            if graph[i][j] == "→" or graph[i][j] =="M":
+                vallin += "-"
+                wallin += w[j-1]
+                adv=(i,j)
+                if graph[i][j] =="M":
+                    graph=copy.deepcopy(middle)
+                j-=1
+        elif graph[i][j]=="M" :
+            if graph == lower :
+                if graph[i][j] == "↓" or graph[i][j] =="M":
+                    vallin += v[i-1]
+                    wallin += "-"
+                    adv=(i,j)
+                    i-=1
+            elif graph == upper:
+                if graph[i][j] == "→" or graph[i][j] =="M":
+                    vallin += "-"
+                    wallin += w[j-1]
+                    adv=(i,j)
+                    j-=1
+            graph=copy.deepcopy(middle)
         
+        print(vallin)
+        print(wallin)
+
         if vallin==testv or testw==wallin:
             print(i,j)
             if len(formation(vallin))!=len(v):
@@ -233,33 +255,34 @@ def backtrackingthreelevels(penalties,v,w):
                     vallin += v[i-1]
                     wallin += "-"
                     i-=1
+                    
             elif len(formation(wallin))!=len(w):
                 while j != 0:
                     vallin += "-"
                     wallin += w[j-1]
                     j-=1
+        print("here")
+
 
         testv=vallin
         testw=wallin
 
-        print(vallin)
-        print(wallin)
+
         if len(formation(vallin))==len(v) or len(formation(wallin))==len(w) :
             if graph[adv[0]][adv[1]]=="U":
                 for x in range(1,len(graph[1])):
                     graph[1][x]="U"
             if len(formation(vallin))==len(v) and len(formation(wallin))==len(w):
                 break
-        
     valinn=''
     walinn=''
     for i in range(len(vallin)):
         valinn+=vallin[len(vallin)-i-1]
         walinn+=wallin[len(vallin)-i-1]
     print(valinn)
-    print(walinn)
+    print(walinn)    
     score=scor(valinn,walinn,penalties)
-    print(score)
+    print(score)        
     return str(score),valinn , walinn 
 
 with open ("dataset.txt","r") as f : 
