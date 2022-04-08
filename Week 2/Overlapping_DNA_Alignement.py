@@ -5,10 +5,10 @@ def bactrackpred(backtrack,i,j):
     lst.append(backtrack[i-1][j-1])
     return lst
 
-def localsource(backtrack,i,j):
-    while i > 0 and j > 0 :
+def overlapping_source(backtrack,i,j):
+    while j!=1 :
         if backtrack[i][j]=="F":
-            return i,j
+            j-=1
         elif backtrack[i][j]=="↓":
             i-=1
         elif backtrack[i][j]=="→":
@@ -16,10 +16,9 @@ def localsource(backtrack,i,j):
         elif backtrack[i][j]=="↘":
             i-=1
             j-=1
+    return i
 
-    return i,j
-
-def DNA_backtrack_Local(v,w,penalties):
+def Overlapping_DNA_Backtrack(v,w,penalties):
     s=list()
     backtrack=[["."]]
     s.append([0])
@@ -53,31 +52,28 @@ def DNA_backtrack_Local(v,w,penalties):
                 backtrack[i][j]="↘"
             
     sink=0
-    for i in range(len(s)): 
-        for j in range(len(s[i])):
-            if s[i][j] > sink:
-                sink=s[i][j]
-                ix=i
-                jx=j    
+    for j in range(1,len(s[0])): 
+        if s[len(v)][j] >= sink:
+            sink=s[len(v)][j]
+            jx=j  
+    
     for b in s :
         print(b)
     for a in backtrack : 
         print(a)
-    return backtrack , s[ix][jx] ,ix ,jx
 
-
-def DNA_local_alignement(v,w,penalties):
-    ans=DNA_backtrack_Local(v,w,penalties)
-    backtrack = ans[0]
-    scor = ans[1]
-    i = ans [2]
-    j = ans [3]
-    ans=localsource(backtrack,i,j)
-    isource = ans[0]
-    jsource = ans[1]
+    return backtrack , s[len(v)][jx] ,jx   
+    
+def Overlapping_DNA_ALignement(v,w,penalties):
+    ans=Overlapping_DNA_Backtrack(v,w,penalties)
+    backtrack=ans[0]
+    i=len(v)
+    scor=ans[1]
+    j=ans[2]
     vallin=""
     wallin=""
-    while i > isource  and j > jsource :
+    isource=overlapping_source(backtrack,i,j)
+    while i >= isource  and j >= 1 :
         if backtrack[i][j]=="↓":
             vallin+=v[i-1]
             wallin+="-"
@@ -188,13 +184,9 @@ def DNA_local_alignement(v,w,penalties):
     print(scor)
     print(valinn)
     print(walinn)
-    return str(scor),valinn , walinn 
-        
-
-
-
-
-
+    return str(scor),valinn , walinn
+    
+    return
 
 with open ("dataset.txt","r") as f : 
     data=f.readlines()
@@ -206,8 +198,5 @@ with open ("dataset.txt","r") as f :
     v=data[1]
     w=data[2]
 
-ans=DNA_local_alignement(v,w,penalties)
-with open("answear.txt","w") as d :
-    for a in ans : 
-        d.write(a+"\n")
 
+Overlapping_DNA_ALignement(v,w,penalties)
