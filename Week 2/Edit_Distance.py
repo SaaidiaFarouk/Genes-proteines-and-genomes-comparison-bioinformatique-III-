@@ -1,3 +1,21 @@
+def scor(vallin,wallin,penalties):
+    scor=0
+    for i in range(len(vallin)):
+        if vallin[i] == wallin[i]:
+            scor+=penalties[0]
+        elif vallin[i] != wallin[i] and vallin[i]!="-" and  wallin[i] !="-":
+            scor-=penalties[1]
+        elif vallin[i] =="-" or wallin[i]:
+            scor-=penalties[2]
+    return scor
+
+def formation(stringaligned):
+    string=""
+    for i in stringaligned:
+        if i !="-":
+            string+=i
+    return string
+
 def bactrackpred(backtrack,i,j):
     lst=list()
     lst.append(backtrack[i][j-1])
@@ -5,9 +23,7 @@ def bactrackpred(backtrack,i,j):
     lst.append(backtrack[i-1][j-1])
     return lst
 
-
-
-def lcsbacktrack(v,w,penalties):
+def penalties_backtrack(v,w,penalties):
     s=list()
     backtrack=[["."]]
     s.append([0])
@@ -35,41 +51,142 @@ def lcsbacktrack(v,w,penalties):
             elif s[i][j] == s[i-1][j-1]+match:
                 backtrack[i].append(".")
                 backtrack[i][j]="↘"
+    return backtrack 
 
-    return backtrack , s[i][j]
+def global_alignement(v,w,penalties):
+    backtrack=penalties_backtrack(v,w,penalties)
+    i = len(v)
+    j = len(w)
+    vallin=""
+    wallin=""
+    testv=""
+    testw=""
+    while i != 0 or j !=0 :
 
-
-def iteraticeoutputlcs(backtrack,v,w):
-    i=len(v)
-    j=len(w)
-    valin=""
-    walin=""
-    while i >0  and j > 0 :
         if backtrack[i][j]=="↓":
-            valin+=v[i-1]
-            walin+="-"
+            vallin+=v[i-1]
+            wallin+="-"
+            adv=(i,j)
             i-=1
         elif backtrack[i][j]=="→":
-            valin+="-"
-            walin+=w[j-1]
+            vallin+="-"
+            wallin+=w[j-1]
+            adv=(i,j)
             j-=1
         elif backtrack[i][j]=="↘":
-            valin+=v[i-1]
-            walin+=w[j-1]
             lst= bactrackpred(backtrack,i,j)
-            if "." in lst and ("↓" in lst or "→" in lst or "↘" in lst) :
-                if lst[0]!=".":
-                    j-=1
-                elif lst[1]!=".":
-                    i-=1
-            else :
-                j-=1
+            if "." not in lst :
+                vallin += v[i-1]
+                wallin += w[j-1] 
+                adv=(i,j)
                 i-=1
+                j-=1
+            elif lst.count(".") == 2 :
+                if lst[0]=="." :
+                    if backtrack[adv[0]][adv[1]]=="↓":
+                        vallin += v[i-1]
+                        wallin += w[j-1] 
+                        adv=(i,j)
+                        i-=1
+                    elif backtrack[adv[0]][adv[1]]=="→":
+                        vallin += v[i-1]
+                        wallin += w[j-1] 
+                        adv=(i,j)
+                        i-=1
+                    elif backtrack[adv[0]][adv[1]]=="↓": 
+                        if adv[0] != i and adv[1] == j :     
+                            vallin += v[i-1]
+                            wallin += "-"
+                            adv=(i,j)
+                            i-=1
+                        elif adv[0] != i and adv[1] != j : 
+                            vallin += v[i-1]
+                            wallin += w[j-1] 
+                            adv=(i,j)
+                            i-=1
+                elif lst[1]=="." :
+                    if backtrack[adv[0]][adv[1]]=="→":
+                        vallin += v[i-1]
+                        wallin += w[j-1] 
+                        adv=(i,j)
+                        j-=1
+                    elif backtrack[adv[0]][adv[1]]=="↓":
+                        vallin += v[i-1]
+                        wallin += w[j-1] 
+                        adv=(i,j)
+                        j-=1
+                    elif backtrack[adv[0]][adv[1]]=="↘": 
+                        if adv[0] == i and adv[1] != j :
+                            vallin += "-"
+                            wallin += w[j-1]
+                            adv=(i,j)
+                            j-=1
+                        elif adv[0] != i and adv[1] != j : 
+                            vallin += v[i-1]
+                            wallin += w[j-1] 
+                            adv=(i,j)
+                            j-=1
+            elif lst.count(".") == 3:
+                if backtrack[adv[0]][adv[1]]=="↓":
+                    vallin += v[i-1]
+                    wallin += w[j-1]
+                    i-=1
+                    j-=1
 
-    return valin , walin 
+                elif backtrack[adv[0]][adv[1]]=="→":
+                    vallin += v[i-1]
+                    wallin += w[j-1]
+                    i-=1
+                    j-=1                
+                elif backtrack[adv[0]][adv[1]]=="↘":
+                    if adv[0] != i and adv[1] != j :
+                        vallin += v[i-1]
+                        wallin += w[j-1]
+                        i-=1
+                        j-=1
+                    
+                    elif adv[0] == i and adv[1] != j :
+                        vallin += "-"
+                        wallin += w[j-1]
+                        i-=1
+                        j-=1
 
+                    elif adv[0] != i and adv[1] == j :
+                        vallin += v[i-1]
+                        wallin +="-"
+                        i-=1
+                        j-=1
 
+        if vallin==testv or testw==wallin:
+            if len(formation(vallin))!=len(v):
+                while i != 0:
+                    vallin += v[i-1]
+                    wallin += "-"
+                    i-=1
+            elif len(formation(wallin))!=len(w):
+                while j != 0:
+                    vallin += "-"
+                    wallin += w[j-1]
+                    j-=1
+        
+        testv=vallin
+        testw=wallin
 
+        if len(formation(vallin))==len(v) or len(formation(wallin))==len(w) :
+            if backtrack[adv[0]][adv[1]]=="→":
+                for x in range(1,len(backtrack[1])):
+                    backtrack[1][x]="→"
+            if len(formation(vallin))==len(v) and len(formation(wallin))==len(w):
+                break
+
+    valinn=''
+    walinn=''
+    for i in range(len(vallin)):
+        valinn+=vallin[len(vallin)-i-1]
+        walinn+=wallin[len(vallin)-i-1]
+    score=scor(valinn,walinn,penalties)
+    return str(score),valinn , walinn 
+        
 
 
 
@@ -78,28 +195,16 @@ with open ("dataset.txt","r") as f :
     data=f.readlines()
     for i in range(len(data)):
         data[i]=data[i].replace("\n","")
-    penalties=data[0].split(" ")
-    for i in range(len(penalties)):
-        penalties[i]=int(penalties[i])
-    v=data[1]
-    w=data[2]
+    v=data[0]
+    w=data[1]
+penalties=[0,1,1]
+ans=global_alignement(v,w,penalties)
 
-
-donnes=lcsbacktrack(v,w,penalties)
-backtrack=donnes[0]
-score=donnes[1]
-ansos=list()
-ans=iteraticeoutputlcs(backtrack,v,w)
-with open ("answear.txt","w") as d : 
-    d.write(str(score)+"\n")
-    for i in range(len(ans)):
-        anso=""
-        for j in range(len(ans[i])):
-            anso+=ans[i][len(ans[i])-1-j]
-        ansos.append(anso)
-        d.write(ansos[i]+"\n")
+with open("answear.txt","w") as d :
+    for a in ans : 
+        d.write(a+"\n")
 count=0
-for i in range(len(ansos[0])):
-    if ansos[0][i]!=ansos[1][i]:
+for i in range(len(ans[1])):
+    if ans[1][i]!=ans[2][i]:
         count+=1
 print(count)    
