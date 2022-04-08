@@ -1,14 +1,3 @@
-def scor(vallin,wallin,penalties):
-    scor=0
-    for i in range(len(vallin)):
-        if vallin[i] == wallin[i]:
-            scor+=penalties[0]
-        elif vallin[i] != wallin[i] and vallin[i]!="-" and  wallin[i] !="-":
-            scor-=penalties[1]
-        elif vallin[i] =="-" or wallin[i]:
-            scor-=penalties[2]
-    return scor
-
 def formation(stringaligned):
     string=""
     for i in stringaligned:
@@ -23,46 +12,81 @@ def bactrackpred(backtrack,i,j):
     lst.append(backtrack[i-1][j-1])
     return lst
 
-def penalties_backtrack(v,w,penalties):
+def localsource(backtrack,i,j):
+    while i > 0 and j > 0 :
+        if backtrack[i][j]=="F":
+            return i,j
+        elif backtrack[i][j]=="↓":
+            i-=1
+        elif backtrack[i][j]=="→":
+            j-=1
+        elif backtrack[i][j]=="↘":
+            i-=1
+            j-=1
+
+    return i,j
+
+def score(val1,val2,pam250):
+    for k in pam250.keys():
+        if val1 == k : 
+            for v in pam250[k]:
+                if val2 == v[0] :
+                    score=v[1]
+    return int(score)
+
+def Pam_backtrack_Local(v,w,pam250):
     s=list()
     backtrack=[["."]]
     s.append([0])
     for i in range(len(v)):
-        s.append([-penalties[2]*(i+1)])
+        s.append([0])
         backtrack.append(["."])
     for j in range(len(w)):
-        s[0].append(-penalties[2]*(j+1))
+        s[0].append(0)
         backtrack[0].append(".")
     for i in range(1,len(v)+1):
         for j in range(1,len(w)+1):
-            match=0
-            if v[i-1] == w[j-1] :
-                match = penalties[0]
-            elif v[i-1] != w[j-1] :
-                match = -penalties[1]
             s[i].append(0)
-            s[i][j]=max(s[i-1][j]-penalties[2],s[i][j-1]-penalties[2],s[i-1][j-1]+match)
-            if s[i][j] == s[i-1][j]-penalties[2]:
+            s1=s[i-1][j]+score(v[i-1],"-",pam250)
+            s2=s[i][j-1]+score("-",w[j-1],pam250)
+            s3=s[i-1][j-1]+score(v[i-1],w[j-1],pam250)
+            s[i][j]=max(0,s1,s2,s3)
+            
+            if s[i][j] == 0 :
+                backtrack[i].append(".")
+                backtrack[i][j]="F"
+            elif s[i][j] == s1:
                 backtrack[i].append(".")
                 backtrack[i][j]="↓"
-            elif s[i][j] == s[i][j-1]-penalties[2]:
+            elif s[i][j] == s2:
                 backtrack[i].append(".")
                 backtrack[i][j]="→"
-            elif s[i][j] == s[i-1][j-1]+match:
+            elif s[i][j] == s3:
                 backtrack[i].append(".")
                 backtrack[i][j]="↘"
-    return backtrack 
+            
+    sink=0
+    for i in range(len(s)): 
+        for j in range(len(s[i])):
+            if s[i][j] > sink:
+                sink=s[i][j]
+                ix=i
+                jx=j    
 
-def global_alignement(v,w,penalties):
-    backtrack=penalties_backtrack(v,w,penalties)
-    i = len(v)
-    j = len(w)
+    return backtrack , s[ix][jx] ,ix ,jx
+
+def Prot_local_alignement(v,w,pam250):
+    ans=Pam_backtrack_Local(v,w,pam250)
+    backtrack = ans[0]
+    scor = ans[1]
+    i = ans [2]
+    j = ans [3]
+    ans=localsource(backtrack,i,j)
+    isource = ans[0]
+    jsource = ans[1]
     vallin=""
     wallin=""
-    testv=""
-    testw=""
-    while i != 0 or j !=0 :
-
+    while i > isource  and j > jsource :
         if backtrack[i][j]=="↓":
             vallin+=v[i-1]
             wallin+="-"
@@ -93,7 +117,7 @@ def global_alignement(v,w,penalties):
                         wallin += w[j-1] 
                         adv=(i,j)
                         i-=1
-                    elif backtrack[adv[0]][adv[1]]=="↓": 
+                    elif backtrack[adv[0]][adv[1]]=="↘": 
                         if adv[0] != i and adv[1] == j :     
                             vallin += v[i-1]
                             wallin += "-"
@@ -156,38 +180,25 @@ def global_alignement(v,w,penalties):
                         wallin +="-"
                         i-=1
                         j-=1
+        elif backtrack[i][j]=="F":
+            vallin += v[i-1]
+            wallin += w[j-1] 
+            adv=(i,j)
+            i-=1
+            j-=1
 
-        if vallin==testv or testw==wallin:
-            if len(formation(vallin))!=len(v):
-                while i != 0:
-                    vallin += v[i-1]
-                    wallin += "-"
-                    i-=1
-            elif len(formation(wallin))!=len(w):
-                while j != 0:
-                    vallin += "-"
-                    wallin += w[j-1]
-                    j-=1
-        
-        testv=vallin
-        testw=wallin
-
-        if len(formation(vallin))==len(v) or len(formation(wallin))==len(w) :
-            if backtrack[adv[0]][adv[1]]=="→":
-                for x in range(1,len(backtrack[1])):
-                    backtrack[1][x]="→"
-            if len(formation(vallin))==len(v) and len(formation(wallin))==len(w):
-                break
-
+    
     valinn=''
     walinn=''
     for i in range(len(vallin)):
         valinn+=vallin[len(vallin)-i-1]
         walinn+=wallin[len(vallin)-i-1]
-    score=scor(valinn,walinn,penalties)
-    return str(score),valinn , walinn 
-        
 
+    print(scor)
+    print(valinn)
+    print(walinn)
+    return str(scor),valinn , walinn 
+        
 
 
 
@@ -195,14 +206,26 @@ with open ("dataset.txt","r") as f :
     data=f.readlines()
     for i in range(len(data)):
         data[i]=data[i].replace("\n","")
-    penalties=data[0].split(" ")
-    for i in range(len(penalties)):
-        penalties[i]=int(penalties[i])
-    v=data[1]
-    w=data[2]
+    v=data[0]
+    w=data[1]
 
-ans=global_alignement(v,w,penalties)
+with open("PAM_250.txt","r") as g :
+    data=g.readlines()
+    g.close()
+    pam250=dict()
+    for i in range(len(data)):
+        data[i]=data[i].replace("\n","")
+    alpha=data[0].split(" ")
+    for i in range(1,len(data)):
+        alphas=data[i].split(" ")
+        pam250[alphas[0]]=[]
+        for j in range(1,len(alphas)):
+            tpl=(alpha[j-1],alphas[j])
+            pam250[alphas[0]].append(tpl)
+
+ans=Prot_local_alignement(v,w,pam250)
 
 with open("answear.txt","w") as d :
     for a in ans : 
         d.write(a+"\n")
+

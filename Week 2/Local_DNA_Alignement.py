@@ -1,14 +1,3 @@
-def scor(vallin,wallin,penalties):
-    scor=0
-    for i in range(len(vallin)):
-        if vallin[i] == wallin[i]:
-            scor+=penalties[0]
-        elif vallin[i] != wallin[i] and vallin[i]!="-" and  wallin[i] !="-":
-            scor-=penalties[1]
-        elif vallin[i] =="-" or wallin[i]:
-            scor-=penalties[2]
-    return scor
-
 def formation(stringaligned):
     string=""
     for i in stringaligned:
@@ -23,15 +12,29 @@ def bactrackpred(backtrack,i,j):
     lst.append(backtrack[i-1][j-1])
     return lst
 
-def penalties_backtrack(v,w,penalties):
+def localsource(backtrack,i,j):
+    while i > 0 and j > 0 :
+        if backtrack[i][j]=="F":
+            return i,j
+        elif backtrack[i][j]=="↓":
+            i-=1
+        elif backtrack[i][j]=="→":
+            j-=1
+        elif backtrack[i][j]=="↘":
+            i-=1
+            j-=1
+
+    return i,j
+
+def DNA_backtrack_Local(v,w,penalties):
     s=list()
     backtrack=[["."]]
     s.append([0])
     for i in range(len(v)):
-        s.append([-penalties[2]*(i+1)])
+        s.append([0])
         backtrack.append(["."])
     for j in range(len(w)):
-        s[0].append(-penalties[2]*(j+1))
+        s[0].append(0)
         backtrack[0].append(".")
     for i in range(1,len(v)+1):
         for j in range(1,len(w)+1):
@@ -41,8 +44,12 @@ def penalties_backtrack(v,w,penalties):
             elif v[i-1] != w[j-1] :
                 match = -penalties[1]
             s[i].append(0)
-            s[i][j]=max(s[i-1][j]-penalties[2],s[i][j-1]-penalties[2],s[i-1][j-1]+match)
-            if s[i][j] == s[i-1][j]-penalties[2]:
+            s[i][j]=max(0,s[i-1][j]-penalties[2],s[i][j-1]-penalties[2],s[i-1][j-1]+match)
+            
+            if s[i][j] == 0 :
+                backtrack[i].append(".")
+                backtrack[i][j]="F"
+            elif s[i][j] == s[i-1][j]-penalties[2]:
                 backtrack[i].append(".")
                 backtrack[i][j]="↓"
             elif s[i][j] == s[i][j-1]-penalties[2]:
@@ -51,18 +58,33 @@ def penalties_backtrack(v,w,penalties):
             elif s[i][j] == s[i-1][j-1]+match:
                 backtrack[i].append(".")
                 backtrack[i][j]="↘"
-    return backtrack 
+            
+    sink=0
+    for i in range(len(s)): 
+        for j in range(len(s[i])):
+            if s[i][j] > sink:
+                sink=s[i][j]
+                ix=i
+                jx=j    
+    for b in s :
+        print(b)
+    for a in backtrack : 
+        print(a)
+    return backtrack , s[ix][jx] ,ix ,jx
 
-def global_alignement(v,w,penalties):
-    backtrack=penalties_backtrack(v,w,penalties)
-    i = len(v)
-    j = len(w)
+
+def DNA_local_alignement(v,w,penalties):
+    ans=DNA_backtrack_Local(v,w,penalties)
+    backtrack = ans[0]
+    scor = ans[1]
+    i = ans [2]
+    j = ans [3]
+    ans=localsource(backtrack,i,j)
+    isource = ans[0]
+    jsource = ans[1]
     vallin=""
     wallin=""
-    testv=""
-    testw=""
-    while i != 0 or j !=0 :
-
+    while i > isource  and j > jsource :
         if backtrack[i][j]=="↓":
             vallin+=v[i-1]
             wallin+="-"
@@ -93,7 +115,7 @@ def global_alignement(v,w,penalties):
                         wallin += w[j-1] 
                         adv=(i,j)
                         i-=1
-                    elif backtrack[adv[0]][adv[1]]=="↓": 
+                    elif backtrack[adv[0]][adv[1]]=="↘": 
                         if adv[0] != i and adv[1] == j :     
                             vallin += v[i-1]
                             wallin += "-"
@@ -156,37 +178,27 @@ def global_alignement(v,w,penalties):
                         wallin +="-"
                         i-=1
                         j-=1
+        elif backtrack[i][j]=="F":
+            vallin += v[i-1]
+            wallin += w[j-1] 
+            adv=(i,j)
+            i-=1
+            j-=1
 
-        if vallin==testv or testw==wallin:
-            if len(formation(vallin))!=len(v):
-                while i != 0:
-                    vallin += v[i-1]
-                    wallin += "-"
-                    i-=1
-            elif len(formation(wallin))!=len(w):
-                while j != 0:
-                    vallin += "-"
-                    wallin += w[j-1]
-                    j-=1
-        
-        testv=vallin
-        testw=wallin
-
-        if len(formation(vallin))==len(v) or len(formation(wallin))==len(w) :
-            if backtrack[adv[0]][adv[1]]=="→":
-                for x in range(1,len(backtrack[1])):
-                    backtrack[1][x]="→"
-            if len(formation(vallin))==len(v) and len(formation(wallin))==len(w):
-                break
-
+    
     valinn=''
     walinn=''
     for i in range(len(vallin)):
         valinn+=vallin[len(vallin)-i-1]
         walinn+=wallin[len(vallin)-i-1]
-    score=scor(valinn,walinn,penalties)
-    return str(score),valinn , walinn 
+
+    print(scor)
+    print(valinn)
+    print(walinn)
+    return str(scor),valinn , walinn 
         
+
+
 
 
 
@@ -201,8 +213,8 @@ with open ("dataset.txt","r") as f :
     v=data[1]
     w=data[2]
 
-ans=global_alignement(v,w,penalties)
-
+ans=DNA_local_alignement(v,w,penalties)
 with open("answear.txt","w") as d :
     for a in ans : 
         d.write(a+"\n")
+
