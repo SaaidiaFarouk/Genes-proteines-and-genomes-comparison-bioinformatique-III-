@@ -1,5 +1,5 @@
 import copy
-def penalties_backtrack(v,w,penalties):
+def penalties_backtrack(v,w,penalties,g):
     s=list()
     backtrack=[["."]]
     s.append([0])
@@ -27,13 +27,22 @@ def penalties_backtrack(v,w,penalties):
             elif s[i][j] == s[i-1][j-1]+match:
                 backtrack[i].append(".")
                 backtrack[i][j]="↘"
-    for a in s: 
+    ss=copy.deepcopy(s)
+    if g ==1 :
+        print("Reversed initial : ")
+        for a in s: 
+            print(a)
+
+        s.reverse()
+        ss=[elem[::-1] for elem in s]
+        
+    print("Backtrack : ")
+    for a in ss: 
         print(a)
+    print("\n")
     return backtrack 
 
 def middle_edge(v,w,penalties):
-    print(v)
-    print(w)
     vrev=""
     wrev=""
     p=-1
@@ -41,9 +50,11 @@ def middle_edge(v,w,penalties):
     mid=len(w)/2
     if len(w) % 2 == 0 : 
         val = True
+        mid=int(mid)
     elif len(w) % 2 != 0 : 
         val = False
         mid=int(mid)
+    print(mid)
     # Ceating reverse strings
     for i in range(len(v)):
         vrev+=v[len(v)-i-1]
@@ -55,9 +66,15 @@ def middle_edge(v,w,penalties):
         p+=1
         if p == 0:
             backtrack=list()
+            print("Normal")
         elif p == 1 : 
             v=strings[0]
             w=strings[1]
+            print("Reversed")
+        print("\nStrings:")
+        print(v)
+        print(w,"\n")
+        penalties_backtrack(v,w,penalties,p)
         s=[[0,-penalties[2]]]
         for i in range(0,len(v)):
             s.append([-penalties[2]*(i+1)])
@@ -81,13 +98,12 @@ def middle_edge(v,w,penalties):
                         backtrack.append("→")
                     elif s[i][1] == s[i-1][0]+match:
                         backtrack.append("↘")
-
             if val == True : 
                 if j == mid :
                     if p == 0 :
                         simiddle=copy.deepcopy(s)
                         break
-                if j == mid-1:
+                if j == mid-1 :
                     if p ==1 :
                         tosinkii=copy.deepcopy(s)
                         tosinkii.reverse()
@@ -104,46 +120,64 @@ def middle_edge(v,w,penalties):
                         tosinkii.reverse()
                         tosinki=[elem[::-1] for elem in tosinkii]
                         break
-
-    #         for a in s : 
-    #             print(a)
-    #         print("\n")
+            
+            # Printing every column untill mid 
+            # for a in s : 
+            #     print(a)
+            # print("\n")
  
+        # Printing the middle colums of every graph :
+        if p == 0 and val==True :
+            print("Simiddle")
+            for a in simiddle : 
+                print (a)
+            print("\n")  
+
+        for a in backtrack : 
+            print(a)
+        print("\n")
+
+        if p == 1 and val == True :
+            print("Tosinki")
+            for a in tosinki : 
+                print (a)
+            print("\n")       
+
     
-    for a in simiddle : 
-        print (a)
-    print("\n")  
-    # for a in backtrack : 
-    #     print(a)
-    # print("\n")
-
-    for a in tosinki : 
-        print (a)
-    print("\n")       
-
+    
+    
     # Finding middle edge
     sums=list()
     middlenode=[[float("-inf"),float("-inf")]]
-    for i in range(len(tosinki)):
+    for i in range(len(simiddle)):
         sums.append([tosinki[i][0]+simiddle[i][0],tosinki[i][1]+simiddle[i][1]])
-        if sums[i][0] > middlenode[0][0] :
-            middlenode[0]=sums[i]
-            imdl=i
-            middle=simiddle[i]
-            sinki=simiddle[i+1]
-    middlenode.append(sums[imdl+1])
-    print(middle)
-    print(sinki)
-    print(middlenode)
+    # printing sums
+    print("\n Sums :")
+    for a in sums :
+        print(a)
+
+    for sum in sums :
+        if sum[0] > middlenode[0][0] :
+            middlenode[0]=sum
+            x=sums.index(sum)
+ 
+    middlenode.append(sums[x+1])
+    print("\nResults:")
+
+    print("\n Middle nodes : ")
+    for a in middlenode :
+        print(a)
+    
+    print("\n Indexes :")
     if middlenode[0][0]==middlenode[0][1]:
-        print(int(mid),imdl)
-        print(int(mid),imdl+1)
+        print(int(mid),x)
+        print(int(mid),x+1)
     elif middlenode[0][0]==middlenode[1][0]:
-        print(int(mid),imdl)
-        print(int(mid),imdl+1)
+        print(int(mid),x)
+        print(int(mid),x+1)
     elif middlenode[0][0]==middlenode[1][1]:
-        print(int(mid),imdl)
-        print(int(mid),imdl+1)
+        print(int(mid),x)
+        print(int(mid),x+1)
 
     return s
 
@@ -158,7 +192,7 @@ with open ("dataset.txt","r") as f :
     w=data[1]
     v=data[2]
 
-penalties_backtrack(v,w,penalties)
+
 
 middle_edge(v,w,penalties)
 
