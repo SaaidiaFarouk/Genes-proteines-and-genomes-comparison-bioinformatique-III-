@@ -45,12 +45,17 @@ def penalties_backtrack(v,w,penalties):
             if s[i][j] == s[i-1][j]-penalties[2]:
                 backtrack[i].append(".")
                 backtrack[i][j]="↓"
+            
             elif s[i][j] == s[i][j-1]-penalties[2]:
                 backtrack[i].append(".")
                 backtrack[i][j]="→"
+            
+            
             elif s[i][j] == s[i-1][j-1]+match:
                 backtrack[i].append(".")
                 backtrack[i][j]="↘"
+    for a in backtrack : 
+        print(a)
     return backtrack 
 
 def global_alignement(v,w,penalties):
@@ -202,7 +207,21 @@ with open ("dataset.txt","r") as f :
     w=data[2]
 
 ans=global_alignement(v,w,penalties)
-
 with open("answear.txt","w") as d :
     for a in ans : 
         d.write(a+"\n")
+    d.close()
+
+ans = penalties_backtrack(v,w,penalties)
+with open("answear.txt","a") as d :
+    for a in ans : 
+        for part in a :
+            if part == "↘":
+                d.write("D ")
+            elif part == "→":
+                d.write("R ")
+            elif part == "↓":
+                d.write("L ")
+            else :
+                d.write(part+" ")
+        d.write("\n")

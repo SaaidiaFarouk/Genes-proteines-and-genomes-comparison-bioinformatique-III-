@@ -1,51 +1,14 @@
 import copy
-def penalties_backtrack(v,w,penalties,g):
-    s=list()
-    backtrack=[["."]]
-    s.append([0])
-    for i in range(len(v)):
-        s.append([-penalties[2]*(i+1)])
-        backtrack.append(["."])
-    for j in range(len(w)):
-        s[0].append(-penalties[2]*(j+1))
-        backtrack[0].append(".")
-    for i in range(1,len(v)+1):
-        for j in range(1,len(w)+1):
-            match=0
-            if v[i-1] == w[j-1] :
-                match = penalties[0]
-            elif v[i-1] != w[j-1] :
-                match = -penalties[1]
-            s[i].append(0)
-            s[i][j]=max(s[i-1][j]-penalties[2],s[i][j-1]-penalties[2],s[i-1][j-1]+match)
-            if s[i][j] == s[i-1][j]-penalties[2]:
-                backtrack[i].append(".")
-                backtrack[i][j]="↓"
-            elif s[i][j] == s[i][j-1]-penalties[2]:
-                backtrack[i].append(".")
-                backtrack[i][j]="→"
-            elif s[i][j] == s[i-1][j-1]+match:
-                backtrack[i].append(".")
-                backtrack[i][j]="↘"
-    ss=copy.deepcopy(s)
-    if g ==1 :
-        print("Reversed initial : ")
-        for a in s: 
-            print(a)
 
-        s.reverse()
-        ss=[elem[::-1] for elem in s]
-        
-    print("Backtrack : ")
-    for a in ss: 
-        print(a)
-    print("\n")
-    return backtrack 
-
-def middle_edge(v,w,penalties):
+def middle_edge(v,w,penalties,top,bot,left,right):
     vrev=""
     wrev=""
     p=-1
+
+    w=w[left:right]
+    v=v[top:bot]
+    print(w)
+    print(v)
     # Determining mid
     mid=len(w)/2
     if len(w) % 2 == 0 : 
@@ -74,7 +37,6 @@ def middle_edge(v,w,penalties):
         # print("\nStrings:")
         # print(v)
         # print(w,"\n")
-        penalties_backtrack(v,w,penalties,p)
         s=[[0,-penalties[2]]]
         for i in range(0,len(v)):
             s.append([-penalties[2]*(i+1)])
@@ -152,22 +114,21 @@ def middle_edge(v,w,penalties):
     for i in range(len(simiddle)):
         sums.append([tosinki[i][0]+simiddle[i][0],tosinki[i][1]+simiddle[i][1]])
     # printing sums
-    print("\n Sums :")
-    for a in sums :
-        print(a)
+    # print("\n Sums :")
+    # for a in sums :
+    #     print(a)
 
     for sum in sums :
         if sum[0] > middlenode[0][0] :
-            middlenode[0]=sum
             x=sums.index(sum)
-
+            middlenode[0]=sum
+            
     if len(v)!=1 and x!=len(v):
         middlenode.append(sums[x+1])
     elif len(v) == 1 and x == 0:
         middlenode.append(sums[x+1])
-
     
-    print("\nResults:")
+    # print("\nResults:")
 
     # print("\n Middle nodes : ")
     # for a in middlenode :
@@ -175,16 +136,53 @@ def middle_edge(v,w,penalties):
     
     # print("\n Indexes :")
     if middlenode[0][0]==middlenode[0][1]:
-        print(x,mid)
-        print(x,mid+1)
+        middlenod=(x,mid)
+        nextnode=(x,mid+1)
+        edge="→"
     elif middlenode[0][0]==middlenode[1][0]:
-        print(x,mid)
-        print(x+1,mid)
+        middlenod=(x,mid)
+        nextnode=(x+1,mid)
+        edge="↓"
     elif middlenode[0][0]==middlenode[1][1]:
-        print(x,mid)
-        print(x+1,mid+1)
+        middlenod=(x,mid)
+        nextnode=(x+1,mid+1)
+        edge="↘"
+    print(middlenod)
+    print(nextnode)
+    print(edge)
+    return middlenod ,nextnode ,edge
 
-    return s
+
+
+
+def linear_space_alignement(v,w,penalties,top,bot,left,right,mid_edge):
+    if left == right :
+        print("Left == Right")
+        return mid_edge
+    elif top == bot : 
+        print("Top == Bot")
+        return mid_edge
+    else :
+        mid= (right +left)/2
+        if (right +left)% 2 == 0 : 
+            mid=int(mid)
+        elif (right +left) != 0 : 
+            mid=int(mid)
+        mid_results=middle_edge(v,w,penalties,top,bot,left,right)
+        mid_edge=mid_results[2]
+        mid_node=mid_results[0][0]
+        second_results=linear_space_alignement(v,w,penalties,top,mid_node,left,mid,mid_edge)
+        mid_edge=second_results
+        print(mid_edge)
+        return mid_edge
+        if mid_edge == "→" or mid_edge == "↘" :
+            mid +=1
+        if mid_edge == "↓" or mid_edge == "↘" :
+            mid_node += 1
+        print("mid = ",mid)
+        print("Mid_Node = ",mid_node)
+        linear_space_alignement(v,w,penalties,mid_node,bot,mid,right,mid_edge)
+     
 
 
 with open ("dataset.txt","r") as f : 
@@ -197,7 +195,10 @@ with open ("dataset.txt","r") as f :
     w=data[1]
     v=data[2]
 
-
-
-middle_edge(v,w,penalties)
-
+top=0
+bot=len(v)
+left=0
+right=len(w)
+mid_edge=""
+linear_space_alignement(v,w,penalties,top,bot,left,right,mid_edge)
+# middle_edge(v,w,penalties,top,bot,left,right)

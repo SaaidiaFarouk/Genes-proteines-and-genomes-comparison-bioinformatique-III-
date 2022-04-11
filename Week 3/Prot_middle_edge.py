@@ -1,48 +1,15 @@
 import copy
-def penalties_backtrack(v,w,penalties,g):
-    s=list()
-    backtrack=[["."]]
-    s.append([0])
-    for i in range(len(v)):
-        s.append([-penalties[2]*(i+1)])
-        backtrack.append(["."])
-    for j in range(len(w)):
-        s[0].append(-penalties[2]*(j+1))
-        backtrack[0].append(".")
-    for i in range(1,len(v)+1):
-        for j in range(1,len(w)+1):
-            match=0
-            if v[i-1] == w[j-1] :
-                match = penalties[0]
-            elif v[i-1] != w[j-1] :
-                match = -penalties[1]
-            s[i].append(0)
-            s[i][j]=max(s[i-1][j]-penalties[2],s[i][j-1]-penalties[2],s[i-1][j-1]+match)
-            if s[i][j] == s[i-1][j]-penalties[2]:
-                backtrack[i].append(".")
-                backtrack[i][j]="↓"
-            elif s[i][j] == s[i][j-1]-penalties[2]:
-                backtrack[i].append(".")
-                backtrack[i][j]="→"
-            elif s[i][j] == s[i-1][j-1]+match:
-                backtrack[i].append(".")
-                backtrack[i][j]="↘"
-    ss=copy.deepcopy(s)
-    if g ==1 :
-        print("Reversed initial : ")
-        for a in s: 
-            print(a)
 
-        s.reverse()
-        ss=[elem[::-1] for elem in s]
-        
-    print("Backtrack : ")
-    for a in ss: 
-        print(a)
-    print("\n")
-    return backtrack 
+def score(val1,val2,bloss62):
+    for k in bloss62.keys():
+        if val1 == k : 
+            for v in bloss62[k]:
+                if val2 == v[0] :
+                    score=v[1]
+    return int(score)
 
-def middle_edge(v,w,penalties):
+
+def middle_edge(v,w,bloss62):
     vrev=""
     wrev=""
     p=-1
@@ -74,27 +41,23 @@ def middle_edge(v,w,penalties):
         # print("\nStrings:")
         # print(v)
         # print(w,"\n")
-        penalties_backtrack(v,w,penalties,p)
-        s=[[0,-penalties[2]]]
+        s=[[0,-5]]
         for i in range(0,len(v)):
-            s.append([-penalties[2]*(i+1)])
+            s.append([-5*(i+1)])
         for j in range(0,len(w)):
             if j!=0:
                 for i in range(0,len(v)+1):
                     s[i][0]=s[i][1]
                     s[i].pop()
-                s[0].append(s[0][0]-penalties[2])
+                s[0].append(s[0][0]-5)
             for i in range(1,len(v)+1):
-                if v[i-1] == w[j] :
-                    match = penalties[0]
-                elif v[i-1] != w[j] :
-                    match = -penalties[1]
+                match=score(v[i-1],w[j],bloss62)
                 s[i].append(0)
-                s[i][1]=max(s[i-1][1]-penalties[2],s[i][0]-penalties[2],s[i-1][0]+match)
+                s[i][1]=max(s[i-1][1]-5,s[i][0]-5,s[i-1][0]+match)
                 if j == mid and p == 0:    
-                    if s[i][1] == s[i-1][1]-penalties[2]:
+                    if s[i][1] == s[i-1][1]-5:
                         backtrack.append("↓")
-                    elif s[i][1] == s[i][0]-penalties[2]:
+                    elif s[i][1] == s[i][0]-5:
                         backtrack.append("→")
                     elif s[i][1] == s[i-1][0]+match:
                         backtrack.append("↘")
@@ -152,20 +115,16 @@ def middle_edge(v,w,penalties):
     for i in range(len(simiddle)):
         sums.append([tosinki[i][0]+simiddle[i][0],tosinki[i][1]+simiddle[i][1]])
     # printing sums
-    print("\n Sums :")
-    for a in sums :
-        print(a)
+    # print("\n Sums :")
+    # for a in sums :
+    #     print(a)
 
     for sum in sums :
         if sum[0] > middlenode[0][0] :
             middlenode[0]=sum
             x=sums.index(sum)
-
     if len(v)!=1 and x!=len(v):
         middlenode.append(sums[x+1])
-    elif len(v) == 1 and x == 0:
-        middlenode.append(sums[x+1])
-
     
     print("\nResults:")
 
@@ -174,15 +133,15 @@ def middle_edge(v,w,penalties):
     #     print(a)
     
     # print("\n Indexes :")
-    if middlenode[0][0]==middlenode[0][1]:
+    if middlenode[0][0]==middlenode[1][1]:
         print(x,mid)
-        print(x,mid+1)
+        print(x+1,mid+1)
     elif middlenode[0][0]==middlenode[1][0]:
         print(x,mid)
         print(x+1,mid)
-    elif middlenode[0][0]==middlenode[1][1]:
+    elif middlenode[0][0]==middlenode[0][1]:
         print(x,mid)
-        print(x+1,mid+1)
+        print(x,mid+1)
 
     return s
 
@@ -191,13 +150,21 @@ with open ("dataset.txt","r") as f :
     data=f.readlines()
     for i in range(len(data)):
         data[i]=data[i].replace("\n","")
-    penalties=data[0].split(" ")
-    for i in range(len(penalties)):
-        penalties[i]=int(penalties[i])
+    v=data[0]
     w=data[1]
-    v=data[2]
 
+with open("Blossum_62.txt","r") as g :
+    data=g.readlines()
+    g.close()
+    bloss62=dict()
+    for i in range(len(data)):
+        data[i]=data[i].replace("\n","")
+    alpha=data[0].split(" ")
+    for i in range(1,len(data)):
+        alphas=data[i].split(" ")
+        bloss62[alphas[0]]=[]
+        for j in range(1,len(alphas)):
+            tpl=(alpha[j-1],alphas[j])
+            bloss62[alphas[0]].append(tpl)
 
-
-middle_edge(v,w,penalties)
-
+middle_edge(v,w,bloss62)
