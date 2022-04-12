@@ -1,51 +1,14 @@
 import copy
-def penalties_backtrack(v,w,penalties,g):
-    s=list()
-    backtrack=[["."]]
-    s.append([0])
-    for i in range(len(v)):
-        s.append([-penalties[2]*(i+1)])
-        backtrack.append(["."])
-    for j in range(len(w)):
-        s[0].append(-penalties[2]*(j+1))
-        backtrack[0].append(".")
-    for i in range(1,len(v)+1):
-        for j in range(1,len(w)+1):
-            match=0
-            if v[i-1] == w[j-1] :
-                match = penalties[0]
-            elif v[i-1] != w[j-1] :
-                match = -penalties[1]
-            s[i].append(0)
-            s[i][j]=max(s[i-1][j]-penalties[2],s[i][j-1]-penalties[2],s[i-1][j-1]+match)
-            if s[i][j] == s[i-1][j]-penalties[2]:
-                backtrack[i].append(".")
-                backtrack[i][j]="↓"
-            elif s[i][j] == s[i][j-1]-penalties[2]:
-                backtrack[i].append(".")
-                backtrack[i][j]="→"
-            elif s[i][j] == s[i-1][j-1]+match:
-                backtrack[i].append(".")
-                backtrack[i][j]="↘"
-    ss=copy.deepcopy(s)
-    if g ==1 :
-        # print("Reversed initial : ")
-        # for a in s: 
-        #     print(a)
-
-        s.reverse()
-        ss=[elem[::-1] for elem in s]
-        
-    # print("Backtrack : ")
-    # for a in ss: 
-    #     print(a)
-    # print("\n")
-    return backtrack 
-
-def middle_edge(v,w,penalties):
+import sys
+x=12
+sys.setrecursionlimit(x)
+def middle_edge(v,w,penalties,top,bot,left,right):
     vrev=""
     wrev=""
     p=-1
+    w=w[left:right]
+    v=v[top:bot]
+    
     # Determining mid
     mid=len(w)/2
     if len(w) % 2 == 0 : 
@@ -54,7 +17,7 @@ def middle_edge(v,w,penalties):
     elif len(w) % 2 != 0 : 
         val = False
         mid=int(mid)
-    # print(mid)
+    
     # Ceating reverse strings
     for i in range(len(v)):
         vrev+=v[len(v)-i-1]
@@ -74,7 +37,6 @@ def middle_edge(v,w,penalties):
         # print("\nStrings:")
         # print(v)
         # print(w,"\n")
-        penalties_backtrack(v,w,penalties,p)
         s=[[0,-penalties[2]]]
         for i in range(0,len(v)):
             s.append([-penalties[2]*(i+1)])
@@ -121,40 +83,12 @@ def middle_edge(v,w,penalties):
                         tosinki=[elem[::-1] for elem in tosinkii]
                         break
             
-            # Printing every column untill mid 
-            # for a in s : 
-            #     print(a)
-            # print("\n")
- 
-        # Printing the middle colums of every graph :
-        # if p == 0 and val==True :
-        #     print("Simiddle")
-        #     for a in simiddle : 
-        #         print (a)
-        #     print("\n")  
-
-        # for a in backtrack : 
-        #     print(a)
-        # print("\n")
-
-        # if p == 1 and val == True :
-        #     print("Tosinki")
-        #     for a in tosinki : 
-        #         print (a)
-        #     print("\n")       
-
-    
-    
     
     # Finding middle edge
     sums=list()
     middlenode=[[float("-inf"),float("-inf")]]
     for i in range(len(simiddle)):
         sums.append([tosinki[i][0]+simiddle[i][0],tosinki[i][1]+simiddle[i][1]])
-    # printing sums
-    print("\n Sums :")
-    for a in sums :
-        print(a)
 
     for sum in sums :
         if sum[0] >= middlenode[0][0] :
@@ -165,31 +99,77 @@ def middle_edge(v,w,penalties):
                 sums.reverse()
             else:
                 x=sums.index(sum)
-
+            
     if len(v)!=1 and x!=len(v):
         middlenode.append(sums[x+1])
     elif len(v) == 1 and x == 0:
         middlenode.append(sums[x+1])
-
     
-    print("\nResults:")
-
-    # print("\n Middle nodes : ")
-    # for a in middlenode :
-    #     print(a)
-    
-    # print("\n Indexes :")
     if middlenode[0][0]==middlenode[0][1]:
-        print(x,mid)
-        print(x,mid+1)
+        middlenod=(x,mid)
+        nextnode=(x,mid+1)
+        edge="→"
     elif middlenode[0][0]==middlenode[1][0]:
-        print(x,mid)
-        print(x+1,mid)
+        middlenod=(x,mid)
+        nextnode=(x+1,mid)
+        edge="↓"
     elif middlenode[0][0]==middlenode[1][1]:
-        print(x,mid)
-        print(x+1,mid+1)
+        middlenod=(x,mid)
+        nextnode=(x+1,mid+1)
+        edge="↘"
+    
+    return middlenod ,nextnode ,edge
 
-    return s
+
+
+def linear_space_alignement(v,w,penalties,top,bot,left,right,):
+    print("We are now working on : \n",w[left:right],v[top:bot])
+    if left == right :
+        print("Left == Right \n")
+        print(top)
+        print(bot)
+        path=(bot-top)*"↓"
+        print("Path = ",path)
+        return path
+    elif top == bot : 
+        print("Top == Bot")
+        print(left)
+        print(right)
+        path=(right-left)*"→"
+        print("Path = ",path)
+        return path
+        
+    mid= (right +left)/2
+    if (right +left)% 2 == 0 : 
+        mid=int(mid)
+    elif (right +left) != 0 : 
+        mid=int(mid)
+    
+    mid_results=middle_edge(v,w,penalties,top,bot,left,right)
+    print(mid_results[0])
+    print(mid_results[1])
+    print(mid_results[2],"\n")
+    mid_edge=mid_results[2]
+    mid_node_coordinates=mid_results[0]
+    mid_node=mid_node_coordinates[0]
+    mid_edge=linear_space_alignement(v,w,penalties,top,mid_node,left,mid)
+
+    print("Second Recursion of ",w[left:right],v[top:bot],"\n",mid_edge,"= Mid Edge\n") 
+    
+    if mid_edge == "→" or mid_edge == "↘" :
+        mid +=1
+    if mid_edge == "↓" or mid_edge == "↘" :
+        mid_node += 1
+
+    print("mid = ",mid)
+    print("RIGHT =",right)
+    print("Mid_Node = ",mid_node)
+    print("BOT = ",bot)
+    print("\n")
+
+    linear_space_alignement(v,w,penalties,mid_node,bot,mid,right)
+    
+
 
 
 with open ("dataset.txt","r") as f : 
@@ -202,7 +182,9 @@ with open ("dataset.txt","r") as f :
     w=data[1]
     v=data[2]
 
+top=0
+bot=len(v)
+left=0
+right=len(w)
 
-
-middle_edge(v,w,penalties)
-
+linear_space_alignement(v,w,penalties,top,bot,left,right)

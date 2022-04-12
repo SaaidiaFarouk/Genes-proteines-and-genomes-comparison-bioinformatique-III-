@@ -1,21 +1,3 @@
-def scor(vallin,wallin,penalties):
-    scor=0
-    for i in range(len(vallin)):
-        if vallin[i] == wallin[i]:
-            scor+=penalties[0]
-        elif vallin[i] != wallin[i] and vallin[i]!="-" and  wallin[i] !="-":
-            scor-=penalties[1]
-        elif vallin[i] =="-" or wallin[i]:
-            scor-=penalties[2]
-    return scor
-
-def formation(stringaligned):
-    string=""
-    for i in stringaligned:
-        if i !="-":
-            string+=i
-    return string
-
 def bactrackpred(backtrack,i,j):
     lst=list()
     lst.append(backtrack[i][j-1])
@@ -23,15 +5,30 @@ def bactrackpred(backtrack,i,j):
     lst.append(backtrack[i-1][j-1])
     return lst
 
-def penalties_backtrack(v,w,penalties):
+def overlapping_source(backtrack,i,j):
+    while j!=1 or backtrack[i][j]=="↓":
+        if backtrack[i][j]=="↓":
+            i-=1
+        elif backtrack[i][j]=="→":
+            j-=1
+        elif backtrack[i][j]=="↘":
+            i-=1
+            j-=1
+        elif backtrack[i][j]==".":
+            i+=1
+            j+=1
+            break
+    return i
+
+def Overlapping_DNA_Backtrack(v,w,penalties):
     s=list()
     backtrack=[["."]]
     s.append([0])
     for i in range(len(v)):
-        s.append([-penalties[2]*(i+1)])
-        backtrack.append(["."])
+        s.append([0])
+        backtrack.append([(".")])
     for j in range(len(w)):
-        s[0].append(-penalties[2]*(j+1))
+        s[0].append(-(j+1)*penalties[2])
         backtrack[0].append(".")
     for i in range(1,len(v)+1):
         for j in range(1,len(w)+1):
@@ -42,32 +39,36 @@ def penalties_backtrack(v,w,penalties):
                 match = -penalties[1]
             s[i].append(0)
             s[i][j]=max(s[i-1][j]-penalties[2],s[i][j-1]-penalties[2],s[i-1][j-1]+match)
+            
             if s[i][j] == s[i-1][j]-penalties[2]:
                 backtrack[i].append(".")
                 backtrack[i][j]="↓"
-            
             elif s[i][j] == s[i][j-1]-penalties[2]:
                 backtrack[i].append(".")
                 backtrack[i][j]="→"
-            
-            
             elif s[i][j] == s[i-1][j-1]+match:
                 backtrack[i].append(".")
                 backtrack[i][j]="↘"
-    # for a in backtrack : 
-    #     print(a)
-    return backtrack 
+            
+    sink=0
+    for j in range(1,len(s[0])): 
+        if s[len(v)][j] >= sink:
+            sink=s[len(v)][j]
+            jx=j  
+    
 
-def global_alignement(v,w,penalties):
-    backtrack=penalties_backtrack(v,w,penalties)
-    i = len(v)
-    j = len(w)
+    return backtrack , s[len(v)][jx] ,jx   
+    
+def Overlapping_DNA_ALignement(v,w,penalties):
+    ans=Overlapping_DNA_Backtrack(v,w,penalties)
+    backtrack=ans[0]
+    i=len(v)
+    scor=ans[1]
+    j=ans[2]
     vallin=""
     wallin=""
-    testv=""
-    testw=""
-    while i != 0 or j !=0 :
-
+    isource=overlapping_source(backtrack,i,j)
+    while   j > 0 and i>=isource:
         if backtrack[i][j]=="↓":
             vallin+=v[i-1]
             wallin+="-"
@@ -93,22 +94,26 @@ def global_alignement(v,w,penalties):
                         wallin += w[j-1] 
                         adv=(i,j)
                         i-=1
+                        j-=1
                     elif backtrack[adv[0]][adv[1]]=="→":
                         vallin += v[i-1]
                         wallin += w[j-1] 
                         adv=(i,j)
                         i-=1
-                    elif backtrack[adv[0]][adv[1]]=="↓": 
+                        j-=1
+                    elif backtrack[adv[0]][adv[1]]=="↘": 
                         if adv[0] != i and adv[1] == j :     
                             vallin += v[i-1]
                             wallin += "-"
                             adv=(i,j)
                             i-=1
+                            j-=1
                         elif adv[0] != i and adv[1] != j : 
                             vallin += v[i-1]
                             wallin += w[j-1] 
                             adv=(i,j)
                             i-=1
+                            j-=1
                 elif lst[1]=="." :
                     if backtrack[adv[0]][adv[1]]=="→":
                         vallin += v[i-1]
@@ -161,40 +166,19 @@ def global_alignement(v,w,penalties):
                         wallin +="-"
                         i-=1
                         j-=1
-
-        if vallin==testv or testw==wallin:
-            if len(formation(vallin))!=len(v):
-                while i != 0:
-                    vallin += v[i-1]
-                    wallin += "-"
-                    i-=1
-            elif len(formation(wallin))!=len(w):
-                while j != 0:
-                    vallin += "-"
-                    wallin += w[j-1]
-                    j-=1
         
-        testv=vallin
-        testw=wallin
-
-        if len(formation(vallin))==len(v) or len(formation(wallin))==len(w) :
-            if backtrack[adv[0]][adv[1]]=="→":
-                for x in range(1,len(backtrack[1])):
-                    backtrack[1][x]="→"
-            if len(formation(vallin))==len(v) and len(formation(wallin))==len(w):
-                break
-
     valinn=''
     walinn=''
     for i in range(len(vallin)):
         valinn+=vallin[len(vallin)-i-1]
         walinn+=wallin[len(vallin)-i-1]
-    score=scor(valinn,walinn,penalties)
-    return str(score),valinn , walinn 
-        
 
-
-
+    print(scor)
+    print(valinn)
+    print(walinn)
+    return str(scor),valinn , walinn
+    
+    return
 
 with open ("dataset.txt","r") as f : 
     data=f.readlines()
@@ -206,22 +190,9 @@ with open ("dataset.txt","r") as f :
     v=data[1]
     w=data[2]
 
-ans=global_alignement(v,w,penalties)
+
+ans=Overlapping_DNA_ALignement(v,w,penalties)
+
 with open("answear.txt","w") as d :
     for a in ans : 
         d.write(a+"\n")
-    d.close()
-
-# ans = penalties_backtrack(v,w,penalties)
-# with open("answear.txt","a") as d :
-#     for a in ans : 
-#         for part in a :
-#             if part == "↘":
-#                 d.write("D ")
-#             elif part == "→":
-#                 d.write("R ")
-#             elif part == "↓":
-#                 d.write("L ")
-#             else :
-#                 d.write(part+" ")
-#         d.write("\n")
