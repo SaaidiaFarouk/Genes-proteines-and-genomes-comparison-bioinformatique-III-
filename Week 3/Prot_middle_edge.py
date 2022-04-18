@@ -31,16 +31,10 @@ def middle_edge(v,w,bloss62):
     # Finding middle columns
     for strings in lst:
         p+=1
-        if p == 0:
-            backtrack=["→"]
-            # print("Normal")
-        elif p == 1 : 
+        if p == 1 : 
             v=strings[0]
             w=strings[1]
-        #     print("Reversed")
-        # print("\nStrings:")
-        # print(v)
-        # print(w,"\n")
+
         s=[[0,-5]]
         for i in range(0,len(v)):
             s.append([-5*(i+1)])
@@ -54,13 +48,7 @@ def middle_edge(v,w,bloss62):
                 match=score(v[i-1],w[j],bloss62)
                 s[i].append(0)
                 s[i][1]=max(s[i-1][1]-5,s[i][0]-5,s[i-1][0]+match)
-                if j == mid and p == 0:    
-                    if s[i][1] == s[i-1][1]-5:
-                        backtrack.append("↓")
-                    elif s[i][1] == s[i][0]-5:
-                        backtrack.append("→")
-                    elif s[i][1] == s[i-1][0]+match:
-                        backtrack.append("↘")
+         
             if val == True : 
                 if j == mid :
                     if p == 0 :
@@ -84,29 +72,6 @@ def middle_edge(v,w,bloss62):
                         tosinki=[elem[::-1] for elem in tosinkii]
                         break
             
-            # Printing every column untill mid 
-            # for a in s : 
-            #     print(a)
-            # print("\n")
- 
-        # Printing the middle colums of every graph :
-        # if p == 0 and val==True :
-        #     print("Simiddle")
-        #     for a in simiddle : 
-        #         print (a)
-        #     print("\n")  
-
-        # for a in backtrack : 
-        #     print(a)
-        # print("\n")
-
-        # if p == 1 and val == True :
-        #     print("Tosinki")
-        #     for a in tosinki : 
-        #         print (a)
-        #     print("\n")       
-
-    
     
     
     # Finding middle edge
@@ -114,36 +79,48 @@ def middle_edge(v,w,bloss62):
     middlenode=[[float("-inf"),float("-inf")]]
     for i in range(len(simiddle)):
         sums.append([tosinki[i][0]+simiddle[i][0],tosinki[i][1]+simiddle[i][1]])
-    # printing sums
-    # print("\n Sums :")
-    # for a in sums :
-    #     print(a)
-
+    sums_zero=list()
+    for sum in sums:
+        sums_zero.append(sum[0])
+    maxi=float("-inf")
     for sum in sums :
-        if sum[0] > middlenode[0][0] :
-            middlenode[0]=sum
-            x=sums.index(sum)
+        if sum[0] > maxi :
+            maxi=sum[0]
+            if sums_zero.count(sum[0])!=1:
+                sums_zero.reverse()
+                x=sums_zero.index(sum[0])
+                sums_zero.reverse()
+                x=len(sums)-1-x
+                middlenode[0]=sums[x]
+            else:
+                x=sums_zero.index(sum[0])
+                middlenode[0]=sums[x]
+            
     if len(v)!=1 and x!=len(v):
         middlenode.append(sums[x+1])
-    
-    print("\nResults:")
+    elif len(v) == 1 and x == 0:
+        middlenode.append(sums[x+1])
 
-    # print("\n Middle nodes : ")
-    # for a in middlenode :
-    #     print(a)
-    
-    # print("\n Indexes :")
+    if len(middlenode)==1:
+        middlenod=(x,mid)
+        nextnode=(x,mid+1)
+        edge="→"
+        return middlenod ,nextnode ,edge
     if middlenode[0][0]==middlenode[1][1]:
-        print(x,mid)
-        print(x+1,mid+1)
-    elif middlenode[0][0]==middlenode[1][0]:
-        print(x,mid)
-        print(x+1,mid)
+        middlenod=(x,mid)
+        nextnode=(x+1,mid+1)
+        edge="↘"
     elif middlenode[0][0]==middlenode[0][1]:
-        print(x,mid)
-        print(x,mid+1)
-
-    return s
+        middlenod=(x,mid)
+        nextnode=(x,mid+1)
+        edge="→"
+    elif middlenode[0][0]==middlenode[1][0]:
+        middlenod=(x,mid)
+        nextnode=(x+1,mid)
+        edge="↓"
+    
+    
+    return middlenod ,nextnode ,edge
 
 
 with open ("dataset.txt","r") as f : 
@@ -167,4 +144,6 @@ with open("Blossum_62.txt","r") as g :
             tpl=(alpha[j-1],alphas[j])
             bloss62[alphas[0]].append(tpl)
 
-middle_edge(v,w,bloss62)
+ans=middle_edge(v,w,bloss62)
+for a in ans :
+    print(a)
