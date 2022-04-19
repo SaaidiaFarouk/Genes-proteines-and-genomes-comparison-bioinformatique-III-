@@ -142,9 +142,9 @@ def MultipleLongestCommonSubsequence_simplest(seq1, seq2, seq3):
             raise ValueError(f'Something wrong at the step of finalization of lines')
 
     return seq1_mod[::-1], seq2_mod[::-1], seq3_mod[::-1], sc
-seq1 = 'CCAATACGAC'
-seq2 = 'GCCTTACGCT'
-seq3 = 'CCCTAGCGGC'
+seq1 = 'TGTACG'
+seq2 = 'GCTAGT'
+seq3 = 'GCTAGT'
 
 seq1_mod, seq2_mod, seq3_mod, sc = MultipleLongestCommonSubsequence_simplest(seq1, seq2, seq3)
 print(sc)        #> 3
