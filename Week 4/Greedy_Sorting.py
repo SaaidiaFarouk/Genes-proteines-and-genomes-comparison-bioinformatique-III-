@@ -48,6 +48,7 @@ with open("dataset.txt","r") as f :
         p[i]=int(p[i])
 
 ans=Greedy_Sorting(p)
+print(len(ans))
 with open ("answear.txt","w") as d:
     for a in ans :
         print(a)
