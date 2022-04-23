@@ -23,20 +23,80 @@ def Colored_Edges(chromosomes):
     
     return edges
 
+def compositions(nodes):
+    composition=list()
+    for node in nodes : 
+        for n in node : 
+            composition.append(n)
+    return composition
+
+def colored_cycle(pedges,qedges):
+    cycles=list()
+    pcomp=compositions(pedges)
+    qcomp=compositions(qedges)
+    while len(pcomp)!=0:
+        cycle=list()
+        strnode=min(pcomp)
+        for edge in pedges:
+            if strnode in edge:
+                m=edge.index(strnode)
+                if m==0:
+                    tpl1=edge[::-1]
+                else:
+                    tpl1=edge
+                cycle.append(tpl1)
+        if pcomp.index(strnode)%2==0:
+            finalnode=pcomp[pcomp.index(strnode)+1]
+        else:
+            finalnode=pcomp[pcomp.index(strnode)-1]
+        pcomp.pop(pcomp.index(strnode))
+        qcomp.pop(qcomp.index(strnode))
+        nextnode=0
+        while nextnode!=finalnode:
+            for edge in qedges:
+                if strnode in edge : 
+                    m=edge.index(strnode)
+                    n=1-m
+                    nextnode=edge[n]
+                    if m==1:
+                        tpl1=edge[::-1]
+                    else:
+                        tpl1=edge
+                    cycle.append(tpl1)
+                    qcomp.pop(qcomp.index(nextnode))
+                    pcomp.pop(pcomp.index(nextnode))
+                    break
+            for edge in pedges : 
+                if nextnode in edge: 
+                    m=edge.index(nextnode)
+                    n=1-m
+                    strnode=edge[n]
+                    if m==1:
+                        tpl1=edge[::-1]
+                    else:
+                        tpl1=edge
+                    cycle.append(tpl1)
+                    if strnode in pcomp:
+                        pcomp.pop(pcomp.index(strnode))
+                        qcomp.pop(qcomp.index(strnode))
+                    break
+            
+        cycle.pop()   
+        cycles.append(cycle)    
+
+    return cycles
+
 def two_break_distance(p,q):
     distance=0
-    # find the number of cycles:
-     #create the simetrique of p using q 
-    q_colored_edges=Colored_Edges(q)
-    p_colored_edges=Colored_Edges(p)
-    print(q_colored_edges)
-    print(p_colored_edges)
-     #create the superimposing graph 
-     #calculate teh number of cycles in q 
      
-    # find the number fo blocks in p and q 
-      # they have teh same number fo blocks which is teh number of their colored edges 
-    # find the difference between block - cycles
+    qedges=Colored_Edges(q)
+    pedges=Colored_Edges(p)
+    cycles=colored_cycle(pedges,qedges)
+    number_of_cycles=len(cycles)
+    number_of_blocks=len(pedges)
+     
+    distance=number_of_blocks-number_of_cycles
+    
     return distance
 
 
@@ -54,6 +114,6 @@ with open ("dataset.txt","r") as f :
             genomes[j][i]=genomes[j][i].split(" ")
             for y in range(len(genomes[j][i])):
                 genomes[j][i][y]=int(genomes[j][i][y])
-print(p,q)
+
 ans=two_break_distance(p,q)
 print(ans)
