@@ -83,7 +83,6 @@ def colored_cycle(pedges,qedges):
             
         cycle.pop()   
         cycles.append(cycle)    
-
     return cycles
 
 def two_break_distance(p,q):

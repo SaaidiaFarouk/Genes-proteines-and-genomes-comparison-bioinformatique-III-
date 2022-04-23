@@ -88,17 +88,13 @@ def cycle_finder(edges):
                 n=1-m
                 strnode=edge[n]
                 break
-        print(cycle,"starting")
+
         while cyclecheck(cycle,edges) == False  :
-            print(edges_compo,"compo")
-            print(edges,"edges")
-            print(strnode,"strnode")
             if strnode%2==0:
                 nextnode=strnode-1
             else:
                 nextnode=strnode+1
             lst1=[strnode,nextnode]
-            print(nextnode,"nextnode")
             edges_compo.pop(edges_compo.index(strnode))
             edges_compo.pop(edges_compo.index(nextnode))
             for edge in edges : 
@@ -108,7 +104,6 @@ def cycle_finder(edges):
                     strnode=edge[n]
             
             cycle.append(lst1)
-            print(cycle,"cycle")
         cycles.append(cycle)
 
     return cycles
