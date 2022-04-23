@@ -35,16 +35,44 @@ def cycle_finder(edges):
     
     while len(edges_compo)!=0:
         cycle=list()
+        strnode=min(edges_compo)
+        lst1=[strnode,strnode+1]
+        nextnode=strnode+1
+        for edge in edges :
+            if strnode in edge :
+                if edge.index(strnode)==0:
+                    lst1.reverse()
+                    strnode=strnode+1
+                    nextnode=strnode-1
+        cycle.append(lst1)
+        edges_compo.pop(edges_compo.index(lst1[0]))
+        edges_compo.pop(edges_compo.index(lst1[1]))
+        for edge in edges :
+            if nextnode in edge :
+                m=edge.index(nextnode)
+                n=1-m
+                strnode=edge[n]
+                break
+    
         while cyclecheck(cycle,edges) == False  :
-            strnode=min(edges_compo)
+            if strnode%2==0:
+                nextnode=strnode-1
+            else:
+                nextnode=strnode+1
             for edge in edges :
                 if strnode in edge :
                     if edge.index(strnode)==1:
-                        lst1=[strnode,strnode+1]
+                        lst1=[strnode,nextnode]
                     elif edge.index(strnode)==0:
-                        lst1=[strnode+1,strnode]
-                    edges_compo.pop(edges_compo.index(min(edges_compo)))
-                    edges_compo.pop(edges_compo.index(min(edges_compo)))
+                        lst1=[nextnode,strnode]
+                    edges_compo.pop(edges_compo.index(strnode))
+                    edges_compo.pop(edges_compo.index(nextnode))
+            for edge in edges : 
+                if nextnode in edge :
+                    m=edge.index(nextnode)
+                    n=1-m
+                    strnode=edge[n]
+            
             cycle.append(lst1)
         cycles.append(cycle)
 
@@ -75,7 +103,7 @@ with open("dataset.txt","r") as f :
         edges.append(edge)
   
 ans=Graph_To_Genome(edges)
-
+print(ans)
 with open("answear.txt","w") as d : 
     anstor=""
     for a in ans :

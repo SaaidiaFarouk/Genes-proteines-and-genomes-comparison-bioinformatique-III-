@@ -39,7 +39,7 @@ with open("dataset.txt","r") as f :
 
 
 ans = Colored_Edges(chromosomes)
-
+print(ans)
 with open("answear.txt","w") as d :
     for a in ans : 
         tpl="("+str(a[0])+", "+str(a[1])+")"
